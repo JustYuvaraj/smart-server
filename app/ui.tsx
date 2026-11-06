@@ -1,0 +1,11 @@
+'use client';
+import {useEffect,useRef,useState,type ReactNode} from 'react';
+import {LoaderCircle,BriefcaseBusiness,X,Camera} from 'lucide-react';
+export const rupees=(n:number)=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:n%100?2:0}).format(n/100);
+export const dateLabel=(s:string)=>new Date(s.length===10?s+'T12:00:00':s).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+export const initials=(s:string)=>s.split(' ').map(x=>x[0]).slice(0,2).join('').toUpperCase();
+export const statusLabels:Record<string,string>={open:'Finding your pro',booked:'Booking confirmed',in_progress:'Work in progress',review:'Ready for review',completed:'Completed',cancelled:'Cancelled'};
+export function Button({children,busy=false,...props}:React.ButtonHTMLAttributes<HTMLButtonElement>&{busy?:boolean}){return <button {...props} disabled={props.disabled||busy}>{busy?<LoaderCircle className="spin" size={18}/>:null}{children}</button>}
+export function Empty({title,children,action}:{title:string;children:ReactNode;action?:ReactNode}){return <div className="empty"><span className="empty-icon"><BriefcaseBusiness size={28}/></span><h3>{title}</h3><p>{children}</p>{action}</div>}
+export function Dialog({title,close,children}:{title:string;close:()=>void;children:ReactNode}){const ref=useRef<HTMLDialogElement>(null);useEffect(()=>{ref.current?.showModal();return()=>ref.current?.close()},[]);return <dialog ref={ref} onCancel={close} onClick={e=>{if(e.target===ref.current)close()}}><div className="dialog-head"><h2>{title}</h2><button className="icon-btn" aria-label="Close dialog" onClick={close}><X/></button></div><div className="dialog-body">{children}</div></dialog>}
+export function Photo({src,alt,demo,role,className='job-photo'}:{src:string;alt:string;demo:boolean;role:string;className?:string}){const [url,setUrl]=useState('');useEffect(()=>{let disposed=false;let blobUrl='';fetch(src,{headers:{'x-smartserve-mode':demo?'demo':'live','x-smartserve-role':role}}).then(r=>r.ok?r.blob():Promise.reject()).then(b=>{blobUrl=URL.createObjectURL(b);if(!disposed)setUrl(blobUrl)}).catch(()=>{});return()=>{disposed=true;if(blobUrl)URL.revokeObjectURL(blobUrl)}},[src,demo,role]);return url?<img className={className} src={url} alt={alt}/>:<div className="photo-placeholder"><Camera size={22}/><span>Photo</span></div>}
