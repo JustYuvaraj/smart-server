@@ -6,7 +6,7 @@ if (existsSync(wranglerPath)) {
     const data = JSON.parse(readFileSync(wranglerPath, "utf-8"));
     data.name = "smartserve-app";
     data.topLevelName = "smartserve-app";
-    delete data.compatibility_flags;
+    data.compatibility_flags = ["nodejs_compat"];
     data.d1_databases = [
       {
         binding: "DB",
@@ -16,7 +16,7 @@ if (existsSync(wranglerPath)) {
     ];
     data.r2_buckets = [];
     writeFileSync(wranglerPath, JSON.stringify(data, null, 2));
-    console.log("Successfully cleaned compatibility_flags and set smartserve-app in dist/server/wrangler.json");
+    console.log("Successfully set compatibility_flags: ['nodejs_compat'] in dist/server/wrangler.json");
   } catch (e) {
     console.error("Error patching wrangler.json:", e);
   }
