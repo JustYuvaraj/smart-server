@@ -1,0 +1,15 @@
+{
+  "name": "smartserve",
+  "compatibility_date": "2026-05-15",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "smartserve-db",
+      "database_id": "5e3c6049-0d35-4003-a5f2-231549451c71"
+    }
+  ],
+  "r2_buckets": []
+}

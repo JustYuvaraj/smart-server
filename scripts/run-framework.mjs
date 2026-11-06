@@ -1,6 +1,28 @@
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { readExecutionProfile } from "./execution-profile.mjs";
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
+
+function patchWrangler() {
+  const wranglerPath = fileURLToPath(new URL("../dist/server/wrangler.json", import.meta.url));
+  if (existsSync(wranglerPath)) {
+    try {
+      const data = JSON.parse(readFileSync(wranglerPath, "utf-8"));
+      data.d1_databases = [
+        {
+          binding: "DB",
+          database_name: "smartserve-db",
+          database_id: "5e3c6049-0d35-4003-a5f2-231549451c71"
+        }
+      ];
+      data.r2_buckets = [];
+      writeFileSync(wranglerPath, JSON.stringify(data, null, 2));
+      console.log("Patched wrangler.json with D1 database ID 5e3c6049-0d35-4003-a5f2-231549451c71");
+    } catch (e) {
+      console.error("Failed to patch wrangler.json", e);
+    }
+  }
+}
 
 const [command, ...args] = process.argv.slice(2);
 if (!["dev", "build"].includes(command)) throw new Error("Expected dev or build.");
@@ -11,6 +33,7 @@ if (managedLinux && command === "build") {
     fileURLToPath(new URL("./build-verified.sh", import.meta.url)), ...args,
   ], { stdio: "inherit" });
   if (result.error) throw result.error;
+  patchWrangler();
   process.exit(result.status ?? 1);
 }
 
@@ -21,3 +44,7 @@ const cli = new URL(managedLinux
 process.argv = [process.execPath, fileURLToPath(cli), command,
   ...(!managedLinux && command === "dev" ? ["--port", "5173"] : []), ...args];
 await import(cli.href);
+
+if (command === "build") {
+  patchWrangler();
+}
